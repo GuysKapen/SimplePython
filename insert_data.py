@@ -1,37 +1,49 @@
 from __future__ import print_function
-from datetime import date, datetime, timedelta
 
-from main import connect_default
+from datetime import date, datetime
 
-cnx = connect_default()
-cursor = cnx.cursor()
+from connector import connect_default
 
-tomorrow = datetime.now().date() + timedelta(days=1)
 
-add_employee = ("INSERT INTO employees "
-                "(first_name, last_name, hire_date, gender, birth_date) "
-                "VALUES (%s, %s, %s, %s, %s)")
-add_salary = ("INSERT INTO salaries "
-              "(emp_no, salary, from_date, to_date) "
-              "VALUES (%(emp_no)s, %(salary)s, %(from_date)s, %(to_date)s)")
+def insert_employee(first_name, last_name, gender, birth_date=date(1977, 6, 14), hire_date=datetime.now().date()):
+    cnx = connect_default()
+    cursor = cnx.cursor()
 
-data_employee = ('Geert', 'Vanderkelen', tomorrow, 'M', date(1977, 6, 14))
+    add_employee = ("INSERT INTO employees "
+                    "(first_name, last_name, hire_date, gender, birth_date) "
+                    "VALUES (%s, %s, %s, %s, %s)")
+    data_employee = (first_name, last_name, hire_date, gender, birth_date)
+    # Insert new employee
+    cursor.execute(add_employee, data_employee)
+    emp_no = cursor.lastrowid
 
-# Insert new employee
-cursor.execute(add_employee, data_employee)
-emp_no = cursor.lastrowid
+    cnx.commit()
 
-# Insert salary information
-data_salary = {
-    'emp_no': emp_no,
-    'salary': 50000,
-    'from_date': tomorrow,
-    'to_date': date(9999, 1, 1),
-}
-cursor.execute(add_salary, data_salary)
+    cursor.close()
+    cnx.close()
 
-# Make sure data is committed to the database
-cnx.commit()
+    return emp_no
 
-cursor.close()
-cnx.close()
+
+def insert_salary(emp_no, salary, from_date=datetime.now().date(), to_date=date(9999, 1, 1)):
+    cnx = connect_default()
+    cursor = cnx.cursor()
+
+    add_salary = ("INSERT INTO salaries "
+                  "(emp_no, salary, from_date, to_date) "
+                  "VALUES (%(emp_no)s, %(salary)s, %(from_date)s, %(to_date)s)")
+
+    # Insert salary information
+    data_salary = {
+        'emp_no': emp_no,
+        'salary': salary,
+        'from_date': from_date,
+        'to_date': to_date,
+    }
+    cursor.execute(add_salary, data_salary)
+
+    # Make sure data is committed to the database
+    cnx.commit()
+
+    cursor.close()
+    cnx.close()
