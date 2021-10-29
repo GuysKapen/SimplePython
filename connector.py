@@ -17,5 +17,4 @@ def connect_default():
             print(err)
         return None
     else:
-        print("Connect successful!")
         return cnx
