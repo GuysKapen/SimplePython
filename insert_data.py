@@ -47,3 +47,75 @@ def insert_salary(emp_no, salary, from_date=datetime.now().date(), to_date=date(
 
     cursor.close()
     cnx.close()
+
+
+# def insert_dept_emp(dept_no, emp_no, from_date=datetime.now().date(), to_date=date(9999, 1, 1)):
+#     cnx = connect_default()
+#     cursor = cnx.cursor()
+#
+#     add_salary = ("INSERT INTO dept_emp "
+#                   "(dept_no, emp_no, from_date, to_date) "
+#                   "VALUES (%(dept_no)s, %(emp_no)s, %(from_date)s, %(to_date)s)")
+#
+#     # Insert salary information
+#     data_salary = {
+#         'dept_no': dept_no,
+#         'emp_no': emp_no,
+#         'from_date': from_date,
+#         'to_date': to_date,
+#     }
+#     cursor.execute(add_salary, data_salary)
+#
+#     # Make sure data is committed to the database
+#     cnx.commit()
+#
+#     cursor.close()
+#     cnx.close()
+
+
+def insert_departments(dept_no, dept_name):
+    cnx = connect_default()
+    cursor = cnx.cursor()
+
+    add_salary = ("INSERT INTO departments "
+                  "(dept_no, dept_name) "
+                  "VALUES (%(dept_no)s, %(dept_name)s)")
+
+    # Insert salary information
+    data_salary = {
+        'dept_no': dept_no,
+        'dept_name': dept_name,
+    }
+    cursor.execute(add_salary, data_salary)
+
+    # Make sure data is committed to the database
+    cnx.commit()
+
+    cursor.close()
+    cnx.close()
+    dept_no = cursor.lastrowid
+    return dept_no
+
+
+def insert_dept_emp(emp_no, dept_no, from_date=datetime.now().date(), to_date=date(9999, 1, 1)):
+    cnx = connect_default()
+    cursor = cnx.cursor()
+
+    add_dept_emp = ("INSERT INTO dept_emp "
+                    "(emp_no, dept_no, from_date, to_date) "
+                    "VALUES (%(emp_no)s, %(dept_no)s, %(from_date)s, %(to_date)s)")
+
+    # Insert salary information
+    data = {
+        'emp_no': emp_no,
+        'dept_no': dept_no,
+        'from_date': from_date,
+        'to_date': to_date,
+    }
+    cursor.execute(add_dept_emp, data)
+
+    # Make sure data is committed to the database
+    cnx.commit()
+
+    cursor.close()
+    cnx.close()
