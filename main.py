@@ -155,6 +155,31 @@ def select_salaries_of_employees():
     print(tabulate(results, headers=['First Name', 'Last Name', 'Salary']))
 
 
+def move_employee_to_department():
+    """
+    create procedure move_employee(emp_no int, dept_name varchar(40))
+    begin
+        declare v_dept_no char(4) default null;
+        select dept_no into v_dept_no from departments where departments.dept_name=dept_name;
+        if v_dept_no is not null then
+            update dept_emp set dept_no=v_dept_no where dept_emp.emp_no=emp_no;
+        end if;
+    end//
+    :return: 
+    """
+    emp_no = input("Input emp id to move to new department: ")
+    try:
+        emp_no = int(emp_no)
+    except ValueError:
+        print("Invalid emp id")
+        return
+    dept_name = input("Input new department name for employee: ")
+    cnx = connect_default()
+    cursor = cnx.cursor()
+    cursor.callproc('move_employee', (emp_no, dept_name))
+    cnx.commit()
+
+
 if __name__ == '__main__':
     functions = {
         '1': input_insert_dept,
@@ -168,6 +193,7 @@ if __name__ == '__main__':
         '9': execute_procedure_list_all_employees_with_salary,
         '10': select_salaries_of_employees,
         '11': execute_procedure_update_salary_of_employee,
+        '12': move_employee_to_department,
         '99': exit
     }
     while True:
@@ -183,6 +209,7 @@ if __name__ == '__main__':
         print("\t9) Select employees with salary")
         print("\t10) Select salaries of employees")
         print("\t11) Update salary of employee")
+        print("\t12) Move employee to new department")
         print("\t99) Exit application")
         x = input("Select option: ")
         if x not in functions.keys():
