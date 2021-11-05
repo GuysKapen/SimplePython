@@ -72,19 +72,45 @@ def insert_salary(emp_no, salary, from_date=datetime.now().date(), to_date=date(
 #     cursor.close()
 #     cnx.close()
 
+def insert_location(street, postal_code, city, state):
+    cnx = connect_default()
+    cursor = cnx.cursor()
 
-def insert_departments(dept_no, dept_name):
+    add_salary = ("INSERT INTO locations "
+                  "(street_address, postal_code, city, state_province) "
+                  "VALUES (%(street_address)s, %(postal_code)s, %(city)s, %(state_province)s)")
+
+    # Insert salary information
+    data_salary = {
+        'street_address': street,
+        'postal_code': postal_code,
+        'city': city,
+        'state_province': state
+    }
+    cursor.execute(add_salary, data_salary)
+
+    # Make sure data is committed to the database
+    cnx.commit()
+
+    cursor.close()
+    cnx.close()
+    dept_no = cursor.lastrowid
+    return dept_no
+
+
+def insert_departments(dept_no, dept_name, location_id):
     cnx = connect_default()
     cursor = cnx.cursor()
 
     add_salary = ("INSERT INTO departments "
-                  "(dept_no, dept_name) "
-                  "VALUES (%(dept_no)s, %(dept_name)s)")
+                  "(dept_no, dept_name, location_id) "
+                  "VALUES (%(dept_no)s, %(dept_name)s, %(location_id)s)")
 
     # Insert salary information
     data_salary = {
         'dept_no': dept_no,
         'dept_name': dept_name,
+        'location_id': location_id
     }
     cursor.execute(add_salary, data_salary)
 
@@ -119,3 +145,29 @@ def insert_dept_emp(emp_no, dept_no, from_date=datetime.now().date(), to_date=da
 
     cursor.close()
     cnx.close()
+
+
+def insert_title(emp_no, title, from_date=datetime.now().date(), to_date=date(9999, 1, 1)):
+    cnx = connect_default()
+    cursor = cnx.cursor()
+
+    add_salary = ("INSERT INTO titles "
+                  "(emp_no, title, from_date, to_date) "
+                  "VALUES (%(emp_no)s, %(title)s, %(from_date)s, %(to_date)s)")
+
+    # Insert salary information
+    data_salary = {
+        'emp_no': emp_no,
+        'title': title,
+        'from_date': from_date,
+        'to_date': to_date
+    }
+    cursor.execute(add_salary, data_salary)
+
+    # Make sure data is committed to the database
+    cnx.commit()
+
+    cursor.close()
+    cnx.close()
+    dept_no = cursor.lastrowid
+    return dept_no

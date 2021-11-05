@@ -6,6 +6,18 @@ from main import connect_default
 DB_NAME = 'employees'
 
 TABLES = {}
+
+TABLES['locations'] = (
+    "CREATE TABLE `locations`("
+    "   `location_id` int(11) AUTO_INCREMENT,"
+    "    primary key (`location_id`),"
+    "   `street_address` varchar(32) not null,"
+    "   `postal_code` varchar(8) NOT NULL,"
+    "   `city` varchar(32) NOT NULL,"
+    "   `state_province` varchar(32) NOT NULL"
+    ")"
+)
+
 TABLES['employees'] = (
     "CREATE TABLE `employees` ("
     "  `emp_no` int(11) NOT NULL AUTO_INCREMENT,"
@@ -21,7 +33,10 @@ TABLES['departments'] = (
     "CREATE TABLE `departments` ("
     "  `dept_no` char(4) NOT NULL,"
     "  `dept_name` varchar(40) NOT NULL,"
-    "  PRIMARY KEY (`dept_no`), UNIQUE KEY `dept_name` (`dept_name`)"
+    "  `location_id` int(11) NOT NULL,"
+    "  PRIMARY KEY (`dept_no`), UNIQUE KEY `dept_name` (`dept_name`),"
+    "  CONSTRAINT `departments_fk` FOREIGN KEY (`location_id`)"
+    "    REFERENCES `locations` (`location_id`) ON DELETE CASCADE"
     ") ENGINE=InnoDB")
 
 TABLES['salaries'] = (

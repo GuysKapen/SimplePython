@@ -1,5 +1,6 @@
 from connector import connect_default
-from insert_data import insert_employee, insert_salary, insert_departments, insert_dept_emp
+from insert_data import insert_employee, insert_salary, insert_departments, insert_dept_emp, insert_location, \
+    insert_title
 from tabulate import tabulate
 
 
@@ -20,10 +21,19 @@ def input_insert_salary(emp_no=None):
     insert_salary(emp_no, salary)
 
 
+def input_insert_location():
+    address = input("Input address: ")
+    postal_code = input("Input postal_code: ")
+    city = input('Input city: ')
+    state = input('Input state: ')
+    return insert_location(address, postal_code, city, state)
+
+
 def input_insert_dept():
     dept_no = input("Input dept_no: ")
     dept_name = input("Input dept_name: ")
-    return insert_departments(dept_no, dept_name)
+    location_id = input('Input location_id: ')
+    return insert_departments(dept_no, dept_name, location_id)
 
 
 def input_insert_dept_emp():
@@ -35,6 +45,19 @@ def input_insert_dept_emp():
 def input_insert_employee_and_salary():
     emp_no = input_insert_employee()
     input_insert_salary(emp_no)
+
+
+def input_insert_title(emp_no=None):
+    if emp_no is None:
+        emp_no = input("Input emp_no: ")
+    title = input("Input title: ")
+    insert_title(emp_no, title)
+
+
+def input_insert_employee_salary_and_title():
+    emp_no = input_insert_employee()
+    input_insert_salary(emp_no)
+    input_insert_title(emp_no)
 
 
 def execute_procedure_list_all_employees():
@@ -96,6 +119,56 @@ def execute_procedure_update_salary_of_employee():
         print("Update salary successfully!")
     except Exception as e:
         print("Error when update salary", e)
+
+
+def promote_employee():
+    """
+    Execute procedure update_salary_of_employee
+    delimiter //
+    CREATE PROCEDURE update_salary_of_employee(emp_no int, salary int)
+    BEGIN
+        UPDATE salaries set salaries.salary=salary where salaries.emp_no=emp_no;
+    END//
+    delimiter ;
+    :return:
+    """
+    cnx = connect_default()
+    cursor = cnx.cursor()
+    emp_no = input("Input employee id: ")
+    try:
+        emp_no = int(emp_no)
+    except ValueError:
+        print("Invalid emp_no")
+        return
+    cursor.execute("select salary from salaries where emp_no=%s" % emp_no)
+    salary = cursor.fetchone()[0]
+    try:
+        cursor.callproc("update_salary_of_employee", (emp_no, salary))
+        print("Update salary successfully!")
+    except Exception as e:
+        print("Error when update salary", e)
+
+
+def execute_procedure_update_title_of_employee():
+    """
+    Execute procedure update_title_of_employee
+    delimiter //
+    CREATE PROCEDURE update_title_of_employee(emp_no int, title varchar(50))
+    BEGIN
+        UPDATE titles set titles.title=title where titles.emp_no=emp_no;
+    END//
+    delimiter ;
+    :return:
+    """
+    cnx = connect_default()
+    cursor = cnx.cursor()
+    emp_no = input("Input employee id: ")
+    salary = input("Input new title for employee: ")
+    try:
+        cursor.callproc("update_title_of_employee", (emp_no, salary))
+        print("Update title successfully!")
+    except Exception as e:
+        print("Error when update title", e)
 
 
 def find_highest_salary():
@@ -182,34 +255,42 @@ def move_employee_to_department():
 
 if __name__ == '__main__':
     functions = {
-        '1': input_insert_dept,
-        '2': input_insert_employee,
-        '3': input_insert_dept_emp,
-        '4': input_insert_salary,
-        '5': input_insert_employee_and_salary,
-        '6': delete_employee,
-        '7': find_highest_salary,
-        '8': execute_procedure_list_all_employees,
-        '9': execute_procedure_list_all_employees_with_salary,
-        '10': select_salaries_of_employees,
-        '11': execute_procedure_update_salary_of_employee,
-        '12': move_employee_to_department,
+        '1': input_insert_location,
+        '2': input_insert_dept,
+        '3': input_insert_employee,
+        '4': input_insert_dept_emp,
+        '5': input_insert_salary,
+        '6': input_insert_title,
+        '7': input_insert_employee_and_salary,
+        '8': input_insert_employee_salary_and_title,
+        '9': delete_employee,
+        '10': find_highest_salary,
+        '11': execute_procedure_list_all_employees,
+        '12': execute_procedure_list_all_employees_with_salary,
+        '13': select_salaries_of_employees,
+        '14': execute_procedure_update_salary_of_employee,
+        '15': promote_employee,
+        '16': move_employee_to_department,
         '99': exit
     }
     while True:
         print("Options for interact with application from menu: ")
-        print("\t1) Insert department")
-        print("\t2) Insert employee")
-        print("\t3) Insert department and employee")
-        print("\t4) Insert salary for employee")
-        print("\t5) Insert employee and salary for employee")
-        print("\t6) Delete employee")
-        print("\t7) Find highest salary")
-        print("\t8) Select all employees")
-        print("\t9) Select employees with salary")
-        print("\t10) Select salaries of employees")
-        print("\t11) Update salary of employee")
-        print("\t12) Move employee to new department")
+        print("\t1) Insert location")
+        print("\t2) Insert department")
+        print("\t3) Insert employee")
+        print("\t4) Insert department and employee")
+        print("\t5) Insert salary for employee")
+        print("\t6) Insert title for employee")
+        print("\t7) Insert employee and salary for employee")
+        print("\t8) Insert employee, salary and title for employee")
+        print("\t9) Delete employee")
+        print("\t10) Find highest salary")
+        print("\t11) Select all employees")
+        print("\t12) Select employees with salary")
+        print("\t13) Select salaries of employees")
+        print("\t14) Update salary of employee")
+        print("\t15) Promote employee")
+        print("\t16) Move employee to new department")
         print("\t99) Exit application")
         x = input("Select option: ")
         if x not in functions.keys():
