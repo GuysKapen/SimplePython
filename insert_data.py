@@ -171,3 +171,30 @@ def insert_title(emp_no, title, from_date=datetime.now().date(), to_date=date(99
     cnx.close()
     dept_no = cursor.lastrowid
     return dept_no
+
+
+def insert_absent(emp_no, abs_date=datetime.now().date(), has_form=True, abs_hours=8):
+    cnx = connect_default()
+    cursor = cnx.cursor()
+
+    add_salary = ("INSERT INTO employees_absent "
+                  "(emp_no, abs_date, has_permission_form, abs_hours) "
+                  "VALUES (%(emp_no)s, %(abs_date)s, %(has_permission_form)s, %(abs_hours)s)")
+
+    # Insert salary information
+    data_absent = {
+        'emp_no': emp_no,
+        'abs_date': abs_date,
+        'has_permission_form': has_form,
+        'abs_hours': abs_hours
+    }
+
+    cursor.execute(add_salary, data_absent)
+
+    # Make sure data is committed to the database
+    cnx.commit()
+
+    cursor.close()
+    cnx.close()
+    dept_no = cursor.lastrowid
+    return dept_no

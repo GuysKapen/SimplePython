@@ -1,6 +1,6 @@
 from connector import connect_default
 from insert_data import insert_employee, insert_salary, insert_departments, insert_dept_emp, insert_location, \
-    insert_title
+    insert_title, insert_absent
 from tabulate import tabulate
 
 
@@ -253,6 +253,27 @@ def move_employee_to_department():
     cnx.commit()
 
 
+def ask_for_absent_a_day():
+    emp_no = input("Input emp_no for absent: ")
+    insert_absent(emp_no)
+
+
+def ask_for_absent_a_noon():
+    emp_no = input("Input emp_no for absent: ")
+    hours = input("Input hours of absent (1-8): ")
+    try:
+        hours = int(hours)
+    except ValueError:
+        print("Invalid hours for absent")
+        return
+    insert_absent(emp_no, abs_hours=hours)
+
+
+def add_employee_to_absent():
+    emp_no = input("Input emp_no for absent: ")
+    insert_absent(emp_no, has_form=False)
+
+
 if __name__ == '__main__':
     functions = {
         '1': input_insert_location,
@@ -271,6 +292,9 @@ if __name__ == '__main__':
         '14': execute_procedure_update_salary_of_employee,
         '15': promote_employee,
         '16': move_employee_to_department,
+        '17': ask_for_absent_a_day,
+        '18': ask_for_absent_a_noon,
+        '19': add_employee_to_absent,
         '99': exit
     }
     while True:
@@ -291,6 +315,9 @@ if __name__ == '__main__':
         print("\t14) Update salary of employee")
         print("\t15) Promote employee")
         print("\t16) Move employee to new department")
+        print("\t17) Ask for absent a day")
+        print("\t18) Ask for absent a part of day")
+        print("\t19) Add employee absent (employee not ask or email for absent - reduce salary in this month)")
         print("\t99) Exit application")
         x = input("Select option: ")
         if x not in functions.keys():

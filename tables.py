@@ -29,6 +29,17 @@ TABLES['employees'] = (
     "  PRIMARY KEY (`emp_no`)"
     ") ENGINE=InnoDB")
 
+TABLES['employees_absent'] = (
+    "CREATE TABLE `employees_absent` ("
+    "   `abs_id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,"
+    "   `emp_no` int(11) NOT NULL,"
+    "   `abs_date` date NOT NULL,"
+    "   `has_permission_form` bool,"
+    "   `abs_hours` int not null default 8,"
+    "   FOREIGN KEY (`emp_no`) REFERENCES employees (`emp_no`) ON DELETE CASCADE"
+    ") ENGINE=InnoDB"
+)
+
 TABLES['departments'] = (
     "CREATE TABLE `departments` ("
     "  `dept_no` char(4) NOT NULL,"
