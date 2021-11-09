@@ -274,6 +274,81 @@ def add_employee_to_absent():
     insert_absent(emp_no, has_form=False)
 
 
+def list_all_employee_abs_more_than_allow():
+    """
+    List all employees who absent more hours than allow (allow is 4 days which mean 32 hours)
+    CREATE PROCEDURE list_employees_abs_more_than_allow()
+    BEGIN
+    select e.*, month(employees_absent.abs_date) as month,
+    year(employees_absent.abs_date) as year, sum(abs_hours) as sum_abs_hours
+        from employees_absent inner join employees e
+            on employees_absent.emp_no = e.emp_no
+            group by e.emp_no, month, year
+                having sum_abs_hours >= 32;
+    END//
+    :return: 
+    """
+    cnx = connect_default()
+    cursor = cnx.cursor()
+    cursor.execute("call list_employees_abs_more_than_allow()")
+    results = cursor.fetchall()
+    print(tabulate(results, headers=['ID', 'DOB', 'First Name', 'Last Name', 'Gender', 'Hire Date', 'Month', 'Year',
+                                     "Hours Absent"]))
+
+
+def find_real_salary_of_employee_in_current_month():
+    """
+    List all employees who absent more hours than allow (allow is 4 days which mean 32 hours)
+    CREATE FUNCTION find_real_salary_of_employee_in_current_month(emp_no int) returns float
+    BEGIN
+        declare real_salary float;
+        select s.salary - salary / 30 * (sum(abs_hours) / 8) into real_salary from salaries s
+            inner join employees e on s.emp_no = e.emp_no
+            inner join employees_absent ea on e.emp_no = ea.emp_no
+                where month(ea.abs_date) = month(sysdate()) and e.emp_no=emp_no
+                group by e.emp_no;
+        return real_salary;
+    END//
+    :return: 
+    """
+    cnx = connect_default()
+    cursor = cnx.cursor()
+    emp_no = input("Input emp_no for find salary: ")
+    try:
+        emp_no = int(emp_no)
+    except ValueError:
+        print("Invalid emp_no")
+        return
+
+    cursor.execute("SELECT find_real_salary_of_employee_in_current_month(%d)" % emp_no)
+    result = cursor.fetchone()
+    print("Real salary of employee: %s" % result)
+
+
+def search_in_employee(search_column, search_value):
+    cnx = connect_default()
+    cursor = cnx.cursor()
+    cursor.execute("SELECT * FROM employees WHERE {} like '%{}%'".format(search_column, search_value))
+
+    results = cursor.fetchall()
+    print(tabulate(results, headers=['ID', 'DOB', 'First Name', 'Last Name', 'Gender', 'Hire Date']))
+
+
+def search_employee_with_first_name():
+    search = input("Input first name for search: ")
+    search_in_employee("first_name", search)
+
+
+def search_employee_with_last_name():
+    search = input("Input last name for search: ")
+    search_in_employee("last_name", search)
+
+
+def search_employee_with_full_name():
+    search = input("Input name for search: ")
+    search_in_employee("concat(first_name, ' ' , last_name)", search)
+
+
 if __name__ == '__main__':
     functions = {
         '1': input_insert_location,
@@ -295,6 +370,11 @@ if __name__ == '__main__':
         '17': ask_for_absent_a_day,
         '18': ask_for_absent_a_noon,
         '19': add_employee_to_absent,
+        '20': list_all_employee_abs_more_than_allow,
+        '21': find_real_salary_of_employee_in_current_month,
+        '22': search_employee_with_first_name,
+        '23': search_employee_with_last_name,
+        '24': search_employee_with_full_name,
         '99': exit
     }
     while True:
@@ -318,6 +398,11 @@ if __name__ == '__main__':
         print("\t17) Ask for absent a day")
         print("\t18) Ask for absent a part of day")
         print("\t19) Add employee absent (employee not ask or email for absent - reduce salary in this month)")
+        print("\t20) Show all employees absent more than allow")
+        print("\t21) Find real salary of employee in current month")
+        print("\t22) Search for employee with first name")
+        print("\t23) Search for employee with last name")
+        print("\t24) Search for employee with full name")
         print("\t99) Exit application")
         x = input("Select option: ")
         if x not in functions.keys():
