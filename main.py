@@ -69,7 +69,7 @@ def execute_procedure_list_all_employees():
         SELECT * FROM employees;
     END//
     delimiter;
-    :return: 
+    :return:
     """
     cnx = connect_default()
     cursor = cnx.cursor()
@@ -182,7 +182,7 @@ def find_highest_salary():
         return max_salary;
     END//
     delimiter;
-    :return: 
+    :return:
     """
     cnx = connect_default()
     cursor = cnx.cursor()
@@ -238,7 +238,7 @@ def move_employee_to_department():
             update dept_emp set dept_no=v_dept_no where dept_emp.emp_no=emp_no;
         end if;
     end//
-    :return: 
+    :return:
     """
     emp_no = input("Input emp id to move to new department: ")
     try:
@@ -286,7 +286,7 @@ def list_all_employee_abs_more_than_allow():
             group by e.emp_no, month, year
                 having sum_abs_hours >= 32;
     END//
-    :return: 
+    :return:
     """
     cnx = connect_default()
     cursor = cnx.cursor()
@@ -294,6 +294,49 @@ def list_all_employee_abs_more_than_allow():
     results = cursor.fetchall()
     print(tabulate(results, headers=['ID', 'DOB', 'First Name', 'Last Name', 'Gender', 'Hire Date', 'Month', 'Year',
                                      "Hours Absent"]))
+
+
+def list_all_employee_avg_abs():
+    """
+    List all employees who absent more hours than allow (allow is 4 days which mean 32 hours)
+    CREATE PROCEDURE list_employees_abs_more_than_allow()
+    BEGIN
+    select e.*, month(employees_absent.abs_date) as month,
+        year(employees_absent.abs_date) as year, AVG(abs_hours) as avg_abs_hours
+            from employees_absent inner join employees e
+                on employees_absent.emp_no = e.emp_no
+                group by e.emp_no, month, year;
+    END//
+    :return:
+    """
+    cnx = connect_default()
+    cursor = cnx.cursor()
+    cursor.execute("call list_employees_abs_more_than_allow()")
+    results = cursor.fetchall()
+    print(tabulate(results, headers=['ID', 'DOB', 'First Name', 'Last Name', 'Gender', 'Hire Date', 'Month', 'Year',
+                                     "Avg Hours Absent"]))
+
+
+def list_all_employee_with_current_salary():
+    """
+    List all employees who absent more hours than allow (allow is 4 days which mean 32 hours)
+    CREATE PROCEDURE list_employees_abs_more_than_allow()
+    BEGIN
+        select e.*, (s.salary - salary / 30 * (sum(abs_hours) / 8)) as current_month_salary
+        from salaries s
+                 inner join employees e on s.emp_no = e.emp_no
+                 inner join employees_absent ea on e.emp_no = ea.emp_no
+        where month(ea.abs_date) = month(sysdate())
+        group by e.emp_no, s.salary;
+    END//
+    :return:
+    """
+    cnx = connect_default()
+    cursor = cnx.cursor()
+    cursor.execute("call list_employees_abs_more_than_allow()")
+    results = cursor.fetchall()
+    print(tabulate(results, headers=['ID', 'DOB', 'First Name', 'Last Name', 'Gender', 'Hire Date', 'Month', 'Year',
+                                     "Current Salary"]))
 
 
 def find_real_salary_of_employee_in_current_month():
@@ -309,7 +352,7 @@ def find_real_salary_of_employee_in_current_month():
                 group by e.emp_no;
         return real_salary;
     END//
-    :return: 
+    :return:
     """
     cnx = connect_default()
     cursor = cnx.cursor()
@@ -323,6 +366,31 @@ def find_real_salary_of_employee_in_current_month():
     cursor.execute("SELECT find_real_salary_of_employee_in_current_month(%d)" % emp_no)
     result = cursor.fetchone()
     print("Real salary of employee: %s" % result)
+
+
+def calculate_budget_salary_in_current_month():
+    """
+    List all employees who absent more hours than allow (allow is 4 days which mean 32 hours)
+    CREATE FUNCTION find_budget_salary_in_current_month() returns float
+    BEGIN
+        declare sum_real_salary float;
+        select sum(current_month_salary) into sum_real_salary from (select (s.salary - salary / 30 * (sum(abs_hours) / 8)) as
+        current_month_salary
+        from salaries s
+                 inner join employees e on s.emp_no = e.emp_no
+                 inner join employees_absent ea on e.emp_no = ea.emp_no
+        where month(ea.abs_date) = month(sysdate())
+        group by e.emp_no, s.salary) real_salaries;
+        return sum_real_salary;
+    END//
+    :return:
+    """
+    cnx = connect_default()
+    cursor = cnx.cursor()
+
+    cursor.execute("SELECT find_budget_salary_in_current_month()")
+    result = cursor.fetchone()
+    print("Budget salary in current month: %s" % result)
 
 
 def search_in_employee(search_column, search_value):
@@ -347,6 +415,36 @@ def search_employee_with_last_name():
 def search_employee_with_full_name():
     search = input("Input name for search: ")
     search_in_employee("concat(first_name, ' ' , last_name)", search)
+
+
+def statistic():
+    """
+    :return:
+    """
+    print("#" * 24 + "\tSTATISTIC\t" + "#" * 24)
+    cnx = connect_default()
+    cursor = cnx.cursor()
+    cursor.execute("select gender, count(*) from employees group by gender;")
+    results = cursor.fetchall()
+    print(tabulate(results, headers=["Gender", "Number"]))
+
+    cursor.execute("select avg(salary) from salaries;")
+    avg_salary = cursor.fetchone()
+    print(f"Avg salary: {avg_salary}")
+
+    cursor.execute("select AVG(abs_hours) from employees_absent;")
+    avg_absent = cursor.fetchone()
+    print(f"Avg absent: {avg_absent}")
+
+    list_all_employee_avg_abs()
+
+    list_all_employee_with_current_salary()
+
+    cursor.execute("select count(distinct emp_no) from employees_absent;")
+    num_employee_absent = cursor.fetchone()
+    print(f"Number of employees absent: {num_employee_absent}")
+
+    calculate_budget_salary_in_current_month()
 
 
 if __name__ == '__main__':
@@ -375,6 +473,7 @@ if __name__ == '__main__':
         '22': search_employee_with_first_name,
         '23': search_employee_with_last_name,
         '24': search_employee_with_full_name,
+        '25': statistic,
         '99': exit
     }
     while True:
@@ -403,6 +502,7 @@ if __name__ == '__main__':
         print("\t22) Search for employee with first name")
         print("\t23) Search for employee with last name")
         print("\t24) Search for employee with full name")
+        print("\t25) Statistic")
         print("\t99) Exit application")
         x = input("Select option: ")
         if x not in functions.keys():
