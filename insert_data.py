@@ -48,30 +48,6 @@ def insert_salary(emp_no, salary, from_date=datetime.now().date(), to_date=date(
     cursor.close()
     cnx.close()
 
-
-# def insert_dept_emp(dept_no, emp_no, from_date=datetime.now().date(), to_date=date(9999, 1, 1)):
-#     cnx = connect_default()
-#     cursor = cnx.cursor()
-#
-#     add_salary = ("INSERT INTO dept_emp "
-#                   "(dept_no, emp_no, from_date, to_date) "
-#                   "VALUES (%(dept_no)s, %(emp_no)s, %(from_date)s, %(to_date)s)")
-#
-#     # Insert salary information
-#     data_salary = {
-#         'dept_no': dept_no,
-#         'emp_no': emp_no,
-#         'from_date': from_date,
-#         'to_date': to_date,
-#     }
-#     cursor.execute(add_salary, data_salary)
-#
-#     # Make sure data is committed to the database
-#     cnx.commit()
-#
-#     cursor.close()
-#     cnx.close()
-
 def insert_location(street, postal_code, city, state):
     cnx = connect_default()
     cursor = cnx.cursor()
@@ -98,17 +74,16 @@ def insert_location(street, postal_code, city, state):
     return dept_no
 
 
-def insert_departments(dept_no, dept_name, location_id):
+def insert_departments(dept_name, location_id):
     cnx = connect_default()
     cursor = cnx.cursor()
 
     add_salary = ("INSERT INTO departments "
-                  "(dept_no, dept_name, location_id) "
-                  "VALUES (%(dept_no)s, %(dept_name)s, %(location_id)s)")
+                  "(dept_name, location_id) "
+                  "VALUES (%(dept_name)s, %(location_id)s)")
 
     # Insert salary information
     data_salary = {
-        'dept_no': dept_no,
         'dept_name': dept_name,
         'location_id': location_id
     }

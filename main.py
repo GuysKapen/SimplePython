@@ -30,10 +30,9 @@ def input_insert_location():
 
 
 def input_insert_dept():
-    dept_no = input("Input dept_no: ")
     dept_name = input("Input dept_name: ")
     location_id = input('Input location_id: ')
-    return insert_departments(dept_no, dept_name, location_id)
+    return insert_departments(dept_name, location_id)
 
 
 def input_insert_dept_emp():

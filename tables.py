@@ -42,7 +42,7 @@ TABLES['employees_absent'] = (
 
 TABLES['departments'] = (
     "CREATE TABLE `departments` ("
-    "  `dept_no` char(4) NOT NULL,"
+    "  `dept_no` int NOT NULL AUTO_INCREMENT,"
     "  `dept_name` varchar(40) NOT NULL,"
     "  `location_id` int(11) NOT NULL,"
     "  PRIMARY KEY (`dept_no`), UNIQUE KEY `dept_name` (`dept_name`),"
@@ -64,7 +64,7 @@ TABLES['salaries'] = (
 TABLES['dept_emp'] = (
     "CREATE TABLE `dept_emp` ("
     "  `emp_no` int(11) NOT NULL,"
-    "  `dept_no` char(4) NOT NULL,"
+    "  `dept_no` int NOT NULL,"
     "  `from_date` date NOT NULL,"
     "  `to_date` date NOT NULL,"
     "  PRIMARY KEY (`emp_no`,`dept_no`), KEY `emp_no` (`emp_no`),"
@@ -78,7 +78,7 @@ TABLES['dept_emp'] = (
 TABLES['dept_manager'] = (
     "  CREATE TABLE `dept_manager` ("
     "  `emp_no` int(11) NOT NULL,"
-    "  `dept_no` char(4) NOT NULL,"
+    "  `dept_no` int NOT NULL,"
     "  `from_date` date NOT NULL,"
     "  `to_date` date NOT NULL,"
     "  PRIMARY KEY (`emp_no`,`dept_no`),"
