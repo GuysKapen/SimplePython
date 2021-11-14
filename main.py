@@ -310,7 +310,7 @@ def list_all_employee_avg_abs():
     """
     cnx = connect_default()
     cursor = cnx.cursor()
-    cursor.execute("call list_employees_abs_more_than_allow()")
+    cursor.execute("call list_employees_with_abs_hours_current_month()")
     results = cursor.fetchall()
     print(tabulate(results, headers=['ID', 'DOB', 'First Name', 'Last Name', 'Gender', 'Hire Date', 'Month', 'Year',
                                      "Avg Hours Absent"]))
@@ -332,10 +332,9 @@ def list_all_employee_with_current_salary():
     """
     cnx = connect_default()
     cursor = cnx.cursor()
-    cursor.execute("call list_employees_abs_more_than_allow()")
+    cursor.execute("call list_employees_with_real_salary()")
     results = cursor.fetchall()
-    print(tabulate(results, headers=['ID', 'DOB', 'First Name', 'Last Name', 'Gender', 'Hire Date', 'Month', 'Year',
-                                     "Current Salary"]))
+    print(tabulate(results, headers=['ID', 'DOB', 'First Name', 'Last Name', 'Gender', 'Hire Date', "Current Salary"]))
 
 
 def find_real_salary_of_employee_in_current_month():
@@ -427,20 +426,22 @@ def statistic():
     results = cursor.fetchall()
     print(tabulate(results, headers=["Gender", "Number"]))
 
+    print("#" * 24 + "\tALL EMPLOYEES AVG ABSENT\t" + "#" * 24)
+    list_all_employee_avg_abs()
+
+    print("#" * 24 + "\tALL EMPLOYEES WITH CURRENT SALARY\t" + "#" * 24)
+    list_all_employee_with_current_salary()
+
     cursor.execute("select avg(salary) from salaries;")
-    avg_salary = cursor.fetchone()
+    avg_salary = cursor.fetchone()[0]
     print(f"Avg salary: {avg_salary}")
 
     cursor.execute("select AVG(abs_hours) from employees_absent;")
-    avg_absent = cursor.fetchone()
+    avg_absent = cursor.fetchone()[0]
     print(f"Avg absent: {avg_absent}")
 
-    list_all_employee_avg_abs()
-
-    list_all_employee_with_current_salary()
-
     cursor.execute("select count(distinct emp_no) from employees_absent;")
-    num_employee_absent = cursor.fetchone()
+    num_employee_absent = cursor.fetchone()[0]
     print(f"Number of employees absent: {num_employee_absent}")
 
     calculate_budget_salary_in_current_month()

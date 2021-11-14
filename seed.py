@@ -85,18 +85,18 @@ for data in data_department:
 cnx.commit()
 
 add_employee = ("INSERT INTO employees "
-                "(first_name, last_name, hire_date, gender, birth_date) "
+                "(first_name, last_name, birth_date, gender, hire_date) "
                 "VALUES (%s, %s, %s, %s, %s)")
 
 data_employees = [
     ("Rodolfo J", "McCaskill", date(1977, 6, 14), "M", datetime.now().date()),
-    ("Ken E", " Barker", date(1987, 6, 22), "M", datetime.now().date()),
+    ("Ken E", "Barker", date(1987, 6, 22), "M", datetime.now().date()),
     ("Nathan B", "Keyser", date(1977, 1, 9), "M", datetime.now().date()),
     ("Alison K", "Howell", date(1998, 12, 7), "F", datetime.now().date()),
     ("Marilyn K", "Fraser", date(1993, 8, 7), "F", datetime.now().date()),
-    ("Charles S", " Barker", date(1958, 7, 26), "M", datetime.now().date()),
-    ("Steven S", " Lyda", date(1968, 4, 15), "M", datetime.now().date()),
-    ("Leona A", " Buster", date(1987, 11, 26), "F", datetime.now().date()),
+    ("Charles S", "Barker", date(1958, 7, 26), "M", datetime.now().date()),
+    ("Steven S", "Lyda", date(1968, 4, 15), "M", datetime.now().date()),
+    ("Leona A", "Buster", date(1987, 11, 26), "F", datetime.now().date()),
     ("Manuel J", "Nettles", date(1969, 11, 23), "M", datetime.now().date()),
 ]
 

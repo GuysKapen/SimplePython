@@ -11,7 +11,7 @@ BEGIN
 END//
 delimiter ;
 
-drop procedure list_all_employees_with_salary;
+# drop procedure list_all_employees_with_salary;
 delimiter //
 CREATE PROCEDURE list_all_employees_with_salary()
 BEGIN
@@ -54,6 +54,7 @@ begin
 end//
 delimiter ;
 
+# drop procedure list_employees_abs_more_than_allow;
 delimiter //
 CREATE PROCEDURE list_employees_abs_more_than_allow()
 BEGIN
@@ -69,9 +70,9 @@ BEGIN
 END//
 delimiter ;
 
-
+# drop procedure list_employees_with_abs_hours;
 delimiter //
-CREATE PROCEDURE list_employees_abs_more_than_allow()
+CREATE PROCEDURE list_employees_with_abs_hours()
 BEGIN
     select e.*,
            month(employees_absent.abs_date) as month,
@@ -84,49 +85,83 @@ BEGIN
 END//
 delimiter ;
 
-
+# drop procedure list_employees_with_abs_hours_current_month;
 delimiter //
-CREATE PROCEDURE list_employees_abs_more_than_allow()
+CREATE PROCEDURE list_employees_with_abs_hours_current_month()
 BEGIN
-    select e.*, (s.salary - salary / 30 * (sum(abs_hours) / 8)) as current_month_salary
-    from salaries s
-             inner join employees e on s.emp_no = e.emp_no
-             inner join employees_absent ea on e.emp_no = ea.emp_no
-    where month(ea.abs_date) = month(sysdate())
-    group by e.emp_no, s.salary;
+    select e.*,
+           month(employees_absent.abs_date) as abs_month,
+           year(employees_absent.abs_date)  as abs_year,
+           AVG(abs_hours)                   as avg_abs_hours
+    from employees_absent
+             inner join employees e
+                        on employees_absent.emp_no = e.emp_no
+    where month(employees_absent.abs_date) = month(sysdate())
+      and year(employees_absent.abs_date) = year(sysdate())
+    group by e.emp_no, abs_month, abs_year;
 END//
 delimiter ;
 
+# drop procedure list_employees_with_real_salary;
+delimiter //
+CREATE PROCEDURE list_employees_with_real_salary()
+BEGIN
+    select employees.*, s.salary - salary / 30 * (ifnull(sum_abs_hours, 0) / 8)
+    from employees
+             inner join salaries s on employees.emp_no = s.emp_no
+             left join
+         (select e.emp_no, month(ea.abs_date) as abs_month, sum(abs_hours) as sum_abs_hours
+          from employees e
+                   left join employees_absent ea
+                             on e.emp_no
+                                 = ea
+                                    .emp_no
+          where month(ea.abs_date) = month(sysdate())
+          group by e.emp_no, abs_month) emp_abs_hour
+         on employees.emp_no = emp_abs_hour.emp_no;
+END//
+delimiter ;
 
+# drop function find_real_salary_of_employee_in_current_month;
 delimiter //
 CREATE FUNCTION find_real_salary_of_employee_in_current_month(emp_no int) returns float
+    READS SQL DATA
+    DETERMINISTIC
 BEGIN
     declare real_salary float;
-    select s.salary - salary / 30 * (sum(abs_hours) / 8)
-    into real_salary
-    from salaries s
-             inner join employees e on s.emp_no = e.emp_no
-             inner join employees_absent ea on e.emp_no = ea.emp_no
-    where month(ea.abs_date) = month(sysdate())
-      and e.emp_no = emp_no
-    group by e.emp_no;
+    select s.salary - salary / 30 * (ifnull(sum_abs_hours, 0) / 8) into real_salary
+    from employees
+             inner join salaries s on employees.emp_no = s.emp_no
+             left join
+         (select e.emp_no, month(ea.abs_date) as abs_month, sum(abs_hours) as sum_abs_hours
+          from employees e
+                   left join employees_absent ea
+                             on e.emp_no
+                                 = ea
+                                    .emp_no
+          where month(ea.abs_date) = month(sysdate())
+          group by e.emp_no, abs_month) emp_abs_hour
+         on employees.emp_no = emp_abs_hour.emp_no;
     return real_salary;
 END//
 delimiter ;
 
+# drop function find_budget_salary_in_current_month;
 delimiter //
 CREATE FUNCTION find_budget_salary_in_current_month() returns float
+    READS SQL DATA
+    DETERMINISTIC
 BEGIN
     declare sum_real_salary float;
     select sum(current_month_salary)
     into sum_real_salary
-    from (select (s.salary - salary / 30 * (sum(abs_hours) / 8)) as
-                     current_month_salary
+    from (select e.*, ifnull(s.salary - salary / 30 * (sum(abs_hours) / 8), s.salary) as current_month_salary
           from salaries s
-                   inner join employees e on s.emp_no = e.emp_no
-                   inner join employees_absent ea on e.emp_no = ea.emp_no
-          where month(ea.abs_date) = month(sysdate())
+                   left join employees e on s.emp_no = e.emp_no
+                   left join employees_absent ea on e.emp_no = ea.emp_no
           group by e.emp_no, s.salary) real_salaries;
     return sum_real_salary;
 END//
 delimiter ;
+
+call list_employees_abs_more_than_allow();
