@@ -129,7 +129,8 @@ CREATE FUNCTION find_real_salary_of_employee_in_current_month(emp_no int) return
     DETERMINISTIC
 BEGIN
     declare real_salary float;
-    select s.salary - salary / 30 * (ifnull(sum_abs_hours, 0) / 8) into real_salary
+    select s.salary - salary / 30 * (ifnull(sum_abs_hours, 0) / 8)
+    into real_salary
     from employees
              inner join salaries s on employees.emp_no = s.emp_no
              left join
@@ -141,7 +142,8 @@ BEGIN
                                     .emp_no
           where month(ea.abs_date) = month(sysdate())
           group by e.emp_no, abs_month) emp_abs_hour
-         on employees.emp_no = emp_abs_hour.emp_no;
+         on employees.emp_no = emp_abs_hour.emp_no
+    where employees.emp_no = emp_no;
     return real_salary;
 END//
 delimiter ;
@@ -165,3 +167,5 @@ END//
 delimiter ;
 
 call list_employees_abs_more_than_allow();
+
+SELECT find_real_salary_of_employee_in_current_month(1);
